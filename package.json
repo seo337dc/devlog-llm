@@ -1,0 +1,10 @@
+{
+  "name": "devlog-llm",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "be:dev": "pnpm --filter be start:dev",
+    "be:build": "pnpm --filter be build"
+  },
+  "packageManager": "pnpm@11.21.0"
+}
