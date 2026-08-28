@@ -32,17 +32,18 @@
 devlog-llm/
 ├── apps/
 │   ├── fe/              # Next.js — 블로그 에디터 + 뷰어 + 챗 UI
-│   ├── be/               # NestJS — 포스트 CRUD, 인증, AI 서비스 프록시
+│   ├── be/               # Go — 포스트 CRUD, 인증, AI 서비스 프록시
 │   └── ai/               # Python + FastAPI — 대화 수집, 임베딩, RAG 검색
 ├── packages/             # (필요 시) FE/BE 공유 타입, 유틸
 ├── docs/
 │   ├── STRATEGY.md       # 현재 파일
 │   └── progress/         # 작업 로그
-└── pnpm-workspace.yaml   # fe, be, packages만 포함 (ai는 별도 venv)
+└── pnpm-workspace.yaml   # fe, packages만 포함 (be는 Go 모듈, ai는 별도 venv)
 ```
 
-> `apps/ai`는 Python이라 pnpm workspace 대상에서 제외. 같은 레포 안에 위치만 공유하고
-> 빌드/의존성은 독립적으로 관리 (requirements.txt + venv).
+> `apps/be`는 Go, `apps/ai`는 Python이라 둘 다 pnpm workspace 대상에서 제외.
+> 같은 레포 안에 위치만 공유하고 빌드/의존성은 각자 독립적으로 관리
+> (`apps/be`는 `go.mod`, `apps/ai`는 requirements.txt + venv).
 
 ---
 
@@ -51,7 +52,7 @@ devlog-llm/
 | 앱 | 스택 | 역할 |
 |---|---|---|
 | `apps/fe` | Next.js + React + TS | 노션 스타일 에디터로 글 작성, 글 목록/상세, AI 챗 UI |
-| `apps/be` | NestJS + TS | 포스트 CRUD API, 인증(로그인), `apps/ai` 프록시/오케스트레이션 |
+| `apps/be` | Go (표준 라이브러리 `net/http`) | 포스트 CRUD API, 인증(로그인), `apps/ai` 프록시/오케스트레이션 |
 | `apps/ai` | Python + FastAPI | 대화 수집 API, 임베딩 생성, 벡터DB 검색(RAG), LLM 응답 생성 |
 
 ### 의존 방향
@@ -68,7 +69,7 @@ FE는 BE만 호출. BE가 필요 시 AI 서비스를 내부적으로 호출 (AI 
 
 ### Phase 1 — 블로그 뼈대 구축
 
-- `apps/be`: NestJS 프로젝트 세팅, PostgreSQL 연결(Supabase 재사용 가능), `posts` 테이블 CRUD API
+- `apps/be`: Go 모듈 세팅, PostgreSQL 연결(Supabase 재사용 가능), `posts` 테이블 CRUD API
 - `apps/fe`: Next.js 세팅, 글 목록/상세 페이지, 간단한 에디터(마크다운 or 블록 에디터)
 - 인증: 개인용이라 우선 심플하게 (단일 사용자, 비밀번호 or NextAuth)
 
@@ -106,7 +107,7 @@ FE는 BE만 호출. BE가 필요 시 AI 서비스를 내부적으로 호출 (AI 
 | 역할 | 기술 | 선택 이유 |
 |---|---|---|
 | FE | Next.js + React + TS | 기존 숙련 스택 |
-| BE | NestJS | TS 통일, 구조화된 백엔드 아키텍처 학습 목적 |
+| BE | Go | 클라우드 네이티브/마이크로서비스에서 수요 높은 언어, CS 기본기(동시성·성능) 학습 목적 |
 | AI/LLM | Python + FastAPI | LLM/임베딩 생태계 (LangChain, Groq 등) |
 | DB | Supabase (PostgreSQL + pgvector) | 무료 플랜, RAG용 벡터 검색 내장 |
 | LLM | Groq (무료 API) | `smpay-ai-conversation-pipeline`에서 검증된 선택 |
