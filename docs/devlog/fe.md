@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-08-31 (이어서 8) — CI-FE 실패 수정: 별도 typecheck 스텝 제거
+
+푸시 후 GitHub Actions에서 CI-API는 통과, CI-FE는 실패. 로그 확인 결과 `tsc --noEmit`가 `PageProps`/
+`LayoutProps` 타입을 못 찾음 — 이 타입은 Next.js가 `next dev`/`next build` 실행 시 `.next/types/routes.d.ts`에
+자동 생성하는데, `.next/`는 gitignore 대상이라 CI 체크아웃 직후엔 존재하지 않음. `next build`가 이미 자체
+타입체크를 포함하고 있어서(로컬 빌드 로그에도 "Running TypeScript..." 단계 확인됨), 빌드 전에 따로 돌리던
+`Typecheck` 스텝을 제거하고 build 스텝의 내장 타입체크에 맡기는 것으로 해결.
+
+---
+
 ## 2026-08-31 (이어서 5) — 레이아웃 전면 재구성 + AI 패널 추가
 
 사용자 피드백: 사이드바가 중앙 정렬 컨테이너 때문에 화면 왼쪽에 큰 여백을 두고 떠 있는 것처럼 보임 (실제
