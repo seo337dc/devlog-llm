@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.db.supabase import get_client
 from app.models import Post, PostCreate
@@ -25,3 +25,12 @@ async def list_posts():
         .execute()
     )
     return result.data
+
+
+@router.get("/{post_id}", response_model=Post)
+async def get_post(post_id: str):
+    client = get_client()
+    result = client.table("posts").select("*").eq("id", post_id).execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail="post not found")
+    return result.data[0]

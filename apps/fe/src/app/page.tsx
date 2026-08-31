@@ -1,75 +1,59 @@
-"use client";
+import Link from "next/link";
+import Sidebar from "@/components/Sidebar";
+import { getPosts } from "@/lib/posts";
 
-import { useEffect, useState } from "react";
-import { createPost, getPosts, type Post } from "@/lib/posts";
+export default async function Home({
+  searchParams,
+}: PageProps<"/">) {
+  const params = await searchParams;
+  const selected =
+    typeof params.category === "string" ? params.category : null;
 
-export default function Home() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const posts = await getPosts().catch(() => []);
 
-  async function loadPosts() {
-    try {
-      setPosts(await getPosts());
-      setError(null);
-    } catch {
-      setError("글 목록을 불러오지 못했습니다. apps/api가 켜져 있는지 확인하세요.");
-    }
+  const categoryCounts = new Map<string, number>();
+  for (const post of posts) {
+    categoryCounts.set(post.category, (categoryCounts.get(post.category) ?? 0) + 1);
   }
+  const categories = Array.from(categoryCounts, ([name, count]) => ({
+    name,
+    count,
+  }));
 
-  useEffect(() => {
-    loadPosts();
-  }, []);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!title.trim() || !content.trim()) return;
-    await createPost({ title, content });
-    setTitle("");
-    setContent("");
-    await loadPosts();
-  }
+  const visiblePosts = selected
+    ? posts.filter((p) => p.category === selected)
+    : posts;
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-16">
-      <h1 className="text-2xl font-semibold">devlog-llm</h1>
+    <div className="mx-auto flex w-full max-w-5xl flex-1">
+      <Sidebar categories={categories} total={posts.length} selected={selected} />
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="제목"
-          className="rounded border border-zinc-300 px-3 py-2"
-        />
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="내용"
-          rows={6}
-          className="rounded border border-zinc-300 px-3 py-2"
-        />
-        <button
-          type="submit"
-          className="self-start rounded bg-black px-4 py-2 text-white"
-        >
-          작성
-        </button>
-      </form>
+      <main className="flex-1 px-8 py-8">
+        <h1 className="mb-8 text-center text-2xl font-semibold">
+          개벼리의 블로그
+        </h1>
 
-      {error && <p className="text-red-600">{error}</p>}
+        {visiblePosts.length === 0 && (
+          <p className="text-center text-zinc-400">아직 글이 없습니다.</p>
+        )}
 
-      <ul className="flex flex-col gap-6">
-        {posts.map((post) => (
-          <li key={post.id} className="border-b border-zinc-200 pb-4">
-            <h2 className="font-medium">{post.title}</h2>
-            <p className="whitespace-pre-wrap text-zinc-600">{post.content}</p>
-            <time className="text-sm text-zinc-400">
-              {new Date(post.created_at).toLocaleString()}
-            </time>
-          </li>
-        ))}
-      </ul>
+        <ul className="flex flex-col gap-6">
+          {visiblePosts.map((post) => (
+            <li key={post.id} className="border-b border-zinc-200 pb-6">
+              <Link href={`/posts/${post.id}`} className="group">
+                <span className="text-xs text-zinc-400">{post.category}</span>
+                <h2 className="text-lg font-medium group-hover:underline">
+                  {post.title}
+                </h2>
+                <p className="line-clamp-2 text-zinc-600">{post.content}</p>
+                <time className="text-sm text-zinc-400">
+                  {new Date(post.created_at).toLocaleDateString()}
+                </time>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </main>
     </div>
   );
 }

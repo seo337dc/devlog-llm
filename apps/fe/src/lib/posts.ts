@@ -4,6 +4,7 @@ export type Post = {
   id: string;
   title: string;
   content: string;
+  category: string;
   created_at: string;
 };
 
@@ -13,9 +14,16 @@ export async function getPosts(): Promise<Post[]> {
   return res.json();
 }
 
+export async function getPost(id: string): Promise<Post> {
+  const res = await fetch(`${API_URL}/posts/${id}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("failed to fetch post");
+  return res.json();
+}
+
 export async function createPost(input: {
   title: string;
   content: string;
+  category: string;
 }): Promise<Post> {
   const res = await fetch(`${API_URL}/posts`, {
     method: "POST",
