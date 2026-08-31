@@ -38,11 +38,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full">
+      <body className="min-h-full">
         <Suspense fallback={null}>
           <Sidebar categories={categories} total={posts.length} />
         </Suspense>
-        <div className="flex-1">{children}</div>
+        {children}
         <AIPanel />
       </body>
     </html>

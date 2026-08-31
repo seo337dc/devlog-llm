@@ -19,9 +19,10 @@ export default async function PostDetail({
         {new Date(post.created_at).toLocaleString()}
       </time>
 
-      <div className="mt-10 whitespace-pre-wrap text-lg leading-8 text-zinc-800">
-        {post.content}
-      </div>
+      <div
+        className="prose prose-zinc mt-10 max-w-none"
+        dangerouslySetInnerHTML={{ __html: post.content }}
+      />
     </div>
   );
 }

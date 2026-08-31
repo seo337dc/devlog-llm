@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { getPosts } from "@/lib/posts";
 
+function excerpt(html: string) {
+  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 export default async function Home({
   searchParams,
 }: PageProps<"/">) {
@@ -32,7 +36,9 @@ export default async function Home({
               <h2 className="text-lg font-medium group-hover:underline">
                 {post.title}
               </h2>
-              <p className="line-clamp-2 text-zinc-600">{post.content}</p>
+              <p className="line-clamp-2 text-zinc-600">
+                {excerpt(post.content)}
+              </p>
               <time className="text-sm text-zinc-400">
                 {new Date(post.created_at).toLocaleDateString()}
               </time>
