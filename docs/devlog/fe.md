@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-08-31 (이어서 9) — Vercel 배포
+
+- Vercel에 레포 연결, Root Directory를 `apps/fe`로 수동 설정 (모노레포라 자동 감지 안 됨)
+- 환경변수 `NEXT_PUBLIC_API_URL=https://devlog-llm.onrender.com` 설정
+- 배포 완료: https://devlog-llm-fe.vercel.app — 정상 응답 확인 (200)
+- API 쪽 `ALLOWED_ORIGINS` 업데이트 전까지는 `/write`의 클라이언트 저장 요청이 CORS로 막힘 (다음 세션에서 마무리)
+
+### 다음 할 일 (내일)
+
+- [ ] Render `ALLOWED_ORIGINS`를 Vercel URL로 업데이트
+- [ ] UI 전반 재검토 및 수정 (사용자 요청 — 다음 세션에서 같이 진행)
+
+---
+
 ## 2026-08-31 (이어서 8) — CI-FE 실패 수정: 별도 typecheck 스텝 제거
 
 푸시 후 GitHub Actions에서 CI-API는 통과, CI-FE는 실패. 로그 확인 결과 `tsc --noEmit`가 `PageProps`/

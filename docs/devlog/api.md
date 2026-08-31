@@ -56,10 +56,15 @@ MVP 최소 루프("글 하나 쓰고 → AI 대화 하나 기록하고 → 회�
   `pyproject.toml`에 `target-version = "py39"`를 먼저 박아두고 나서야 안전하게 자동수정 적용.
   `from __future__ import annotations`를 추가하면 3.9에서도 `X \| None` 문법을 안전하게 쓸 수 있다는 것도 확인.
 
-### 배포 (예정)
+### 배포
 
-- Render 대시보드에서 이 레포를 Blueprint로 연결 (`render.yaml` 인식) → `apps/api` 자동 빌드/배포
-- 환경변수(`SUPABASE_URL`, `SUPABASE_KEY`, `ALLOWED_ORIGINS`)는 Render 대시보드에서 직접 입력 필요
+- Render 대시보드에 Blueprint 메뉴가 안 보여서(UI 변경) `render.yaml` 대신 **Web Service 수동 생성**으로 배포
+  (Root Directory: `apps/api`, Build: `pip install -r requirements.txt`, Start:
+  `uvicorn app.main:app --host 0.0.0.0 --port $PORT`)
+- 배포 완료: https://devlog-llm.onrender.com — `/health`, `/posts` 모두 프로덕션 Supabase 연결 확인됨
+- `ALLOWED_ORIGINS`는 아직 `http://localhost:3010`로 남아있음 — Vercel 배포 URL로 업데이트 필요
+  (브라우저에서 직접 호출하는 `/write` 저장은 이거 고치기 전까진 CORS로 막힘. SSR로 가져오는 홈/상세
+  화면은 서버-서버 요청이라 CORS 영향 없음)
 
 ---
 
