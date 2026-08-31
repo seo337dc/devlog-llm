@@ -1,15 +1,21 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 
 type Props = {
   categories: { name: string; count: number }[];
   total: number;
-  selected: string | null;
 };
 
-export default function Sidebar({ categories, total, selected }: Props) {
+export default function Sidebar({ categories, total }: Props) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const selected = pathname === "/" ? searchParams.get("category") : undefined;
+
   return (
-    <aside className="w-56 shrink-0 border-r border-zinc-200 px-4 py-8">
-      <Link href="/" className="mb-8 block text-lg font-semibold">
+    <aside className="w-52 shrink-0 border-r border-zinc-200 px-4 py-6">
+      <Link href="/" className="mb-6 block text-lg font-semibold">
         devlog-llm
       </Link>
 
@@ -41,7 +47,7 @@ export default function Sidebar({ categories, total, selected }: Props) {
 
       <Link
         href="/write"
-        className="mt-8 block rounded bg-black px-3 py-2 text-center text-sm text-white"
+        className="mt-6 block rounded bg-black px-3 py-2 text-center text-sm text-white"
       >
         새 글 작성
       </Link>

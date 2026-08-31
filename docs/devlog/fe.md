@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-08-31 (이어서 5) — 레이아웃 전면 재구성 + AI 패널 추가
+
+사용자 피드백: 사이드바가 중앙 정렬 컨테이너 때문에 화면 왼쪽에 큰 여백을 두고 떠 있는 것처럼 보임 (실제
+스크린샷 기준). "왼쪽으로 쭉 밀어라", "write 페이지에도 사이드바 나오게", "공간 넓혀라", "AI 버튼 누르면
+화면 반이 AI 패널로 열리게" 요청.
+
+### 작업 내용
+
+| # | 작업 | 상태 |
+|---|------|------|
+| 1 | `Sidebar`를 `page.tsx`가 아니라 루트 `layout.tsx`로 이동 — 모든 페이지(`/`, `/write`, `/posts/[id]`)에 공통 적용 | ✅ |
+| 2 | `Sidebar`를 client component로 전환, `usePathname`/`useSearchParams`로 활성 카테고리 직접 계산 (layout은 searchParams를 못 받음) | ✅ |
+| 3 | `layout.tsx`에서 `getPosts()` 호출해 카테고리 집계 후 `Sidebar`에 전달 | ✅ |
+| 4 | 홈(`page.tsx`)에서 `mx-auto max-w-5xl` 전체 폭 제한 제거 — 사이드바는 화면 끝에 flush, 본문만 `max-w-3xl`로 가독성 유지 | ✅ |
+| 5 | `components/AIPanel.tsx` 신규 — 우하단 플로팅 "AI" 버튼 + 클릭 시 화면 우측 절반(`w-1/2`) 슬라이드인 채팅 패널 | ✅ |
+| 6 | 브라우저로 사이드바 flush 배치, write 페이지 사이드바 노출, AI 패널 열림/입력까지 확인 | ✅ |
+
+### 참고
+
+- AI 패널은 지금 **UI 뼈대만** — 실제 LLM 응답 없음, 로컬 state로 사용자 메시지만 쌓임. 첫 메시지로 "아직
+  실제 학습된 답변 아님"을 명시해둠. 실제 연동은 Phase 2(대화 수집)·Phase 3(RAG) 이후.
+- `useSearchParams`를 쓰는 client component는 Suspense 경계가 필요해서 `layout.tsx`에서 `<Suspense>`로 감쌈.
+
+---
+
 ## 2026-08-31 — Next.js 프로젝트 세팅
 
 ### 작업 내용
