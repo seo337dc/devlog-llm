@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, HTTPException
 
 from app.db.supabase import get_client
@@ -15,7 +13,7 @@ async def create_post(post: PostCreate):
     return result.data[0]
 
 
-@router.get("", response_model=List[Post])
+@router.get("", response_model=list[Post])
 async def list_posts():
     client = get_client()
     result = (

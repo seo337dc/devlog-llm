@@ -109,7 +109,7 @@ apps/fe → apps/api
 | API | Python + FastAPI | AI/LLM 생태계 중심 언어, `smpay-ai-conversation-pipeline`과 학습 병행 |
 | DB | Supabase (PostgreSQL + pgvector) | 무료 플랜, RAG용 벡터 검색 내장 |
 | LLM | Groq (무료 API) | `smpay-ai-conversation-pipeline`에서 검증된 선택 |
-| 배포 | 미정 (Vercel/FE, Render/API 검토) | Phase 1 완료 후 결정 |
+| 배포 | Vercel(FE) + Render(API) | Inote Money와 동일 조합, 무료 티어, GitHub 연동 자동 배포 |
 
 ---
 

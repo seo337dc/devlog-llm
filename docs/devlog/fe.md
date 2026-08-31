@@ -77,3 +77,20 @@ textarea + `whitespace-pre-wrap` 렌더링 — 리치 텍스트 에디터는 여
 
 - [ ] 노션 스타일 리치 에디터 (Tiptap 등) 도입
 - [ ] `POST /conversations` — 대화 수집 API (Phase 2)
+
+---
+
+## 2026-08-31 (이어서 4) — CI 세팅 + Vercel 배포 준비
+
+### 작업 내용
+
+| # | 작업 | 상태 |
+|---|------|------|
+| 1 | `.github/workflows/ci-fe.yml` — `apps/fe/**` 변경 시에만 트리거, typecheck + lint + build | ✅ |
+| 2 | 로컬에서 `tsc --noEmit`, `pnpm lint`, `pnpm build` 전부 통과 확인 후 워크플로 작성 | ✅ |
+
+### 배포 (예정)
+
+- Vercel 대시보드에서 이 레포 연결, **Root Directory를 `apps/fe`로 설정** (모노레포라 필수)
+- 환경변수 `NEXT_PUBLIC_API_URL`을 Render에 배포된 API의 실제 URL로 설정
+- Vercel은 GitHub 연동만 해두면 push마다 자동 배포 — 별도 GitHub Actions CD 불필요

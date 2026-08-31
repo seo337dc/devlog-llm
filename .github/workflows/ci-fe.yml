@@ -1,0 +1,38 @@
+name: CI - FE
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/fe/**"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+  pull_request:
+    paths:
+      - "apps/fe/**"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter fe exec tsc --noEmit
+
+      - name: Lint
+        run: pnpm --filter fe lint
+
+      - name: Build
+        run: pnpm --filter fe build

@@ -31,8 +31,35 @@ MVP 최소 루프("글 하나 쓰고 → AI 대화 하나 기록하고 → 회�
 
 ### 다음 할 일
 
-- [ ] `apps/fe` 세팅 — 지금은 API만 있고 실제로 글 쓰는 화면이 없음
+- [x] `apps/fe` 세팅 — 지금은 API만 있고 실제로 글 쓰는 화면이 없음
 - [ ] `POST /conversations` — 대화 수집 API (Phase 2)
+
+---
+
+## 2026-08-31 (이어서 3) — CI 세팅 + Render 배포 준비
+
+### 작업 내용
+
+| # | 작업 | 상태 |
+|---|------|------|
+| 1 | `.github/workflows/ci-api.yml` — `apps/api/**` 변경 시에만 트리거, ruff lint + import 체크 | ✅ |
+| 2 | `pyproject.toml`에 `target-version = "py39"` 명시 — ruff가 3.10+ 문법(`X \| None`)을 잘못 제안하는 것 방지 | ✅ |
+| 3 | ruff 지적사항 반영: import 정렬, `from __future__ import annotations` + `Client \| None`, `List` → `list` | ✅ |
+| 4 | `requirements-dev.txt` 분리 (ruff는 dev 전용) | ✅ |
+| 5 | CORS `allow_origins`를 하드코딩 대신 `ALLOWED_ORIGINS` 환경변수로 변경 (배포 환경 대응) | ✅ |
+| 6 | 루트에 `render.yaml` 추가 (Render Blueprint) | ✅ |
+
+### 트러블슈팅
+
+- ruff 기본 설정이 target-version을 최신으로 가정해서 `Optional[Client]` → `Client \| None`을 제안함 — 이걸
+  그대로 적용하면 Python 3.9 런타임에서 다시 깨짐 (아까 Go→Python 전환 때 겪은 것과 같은 종류의 실수).
+  `pyproject.toml`에 `target-version = "py39"`를 먼저 박아두고 나서야 안전하게 자동수정 적용.
+  `from __future__ import annotations`를 추가하면 3.9에서도 `X \| None` 문법을 안전하게 쓸 수 있다는 것도 확인.
+
+### 배포 (예정)
+
+- Render 대시보드에서 이 레포를 Blueprint로 연결 (`render.yaml` 인식) → `apps/api` 자동 빌드/배포
+- 환경변수(`SUPABASE_URL`, `SUPABASE_KEY`, `ALLOWED_ORIGINS`)는 Render 대시보드에서 직접 입력 필요
 
 ---
 
