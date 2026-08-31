@@ -18,9 +18,6 @@ venv/
 __pycache__/
 *.pyc
 
-# go
-apps/be/server
-apps/be/tmp/
 
 # misc
 .DS_Store

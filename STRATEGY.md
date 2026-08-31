@@ -32,18 +32,20 @@
 devlog-llm/
 ├── apps/
 │   ├── fe/              # Next.js — 블로그 에디터 + 뷰어 + 챗 UI
-│   ├── be/               # Go — 포스트 CRUD, 인증, AI 서비스 프록시
-│   └── ai/               # Python + FastAPI — 대화 수집, 임베딩, RAG 검색
-├── packages/             # (필요 시) FE/BE 공유 타입, 유틸
+│   └── api/             # Python + FastAPI — 포스트 CRUD, 대화 수집, 임베딩, RAG 검색
+├── packages/             # (필요 시) FE 공유 타입, 유틸
 ├── docs/
 │   ├── STRATEGY.md       # 현재 파일
 │   └── progress/         # 작업 로그
-└── pnpm-workspace.yaml   # fe, packages만 포함 (be는 Go 모듈, ai는 별도 venv)
+└── pnpm-workspace.yaml   # fe, packages만 포함 (api는 별도 venv)
 ```
 
-> `apps/be`는 Go, `apps/ai`는 Python이라 둘 다 pnpm workspace 대상에서 제외.
-> 같은 레포 안에 위치만 공유하고 빌드/의존성은 각자 독립적으로 관리
-> (`apps/be`는 `go.mod`, `apps/ai`는 requirements.txt + venv).
+> 원래 BE(포스트 CRUD)와 AI(대화 수집·RAG)를 분리할 계획이었으나, 혼자 쓰는
+> 개인 프로젝트에서 서비스를 둘로 나눌 이유가 없어 `apps/api` 하나로 통합.
+> 언어도 Node → Go → Python으로 계속 흔들리다가, AI/LLM 생태계가 어차피
+> Python 중심이라는 점과 `smpay-ai-conversation-pipeline`에서 이미 Python을
+> 학습 중이라는 점을 근거로 Python(FastAPI) 하나로 최종 확정.
+> pnpm workspace 대상에서는 제외 (requirements.txt + venv로 독립 관리).
 
 ---
 
@@ -52,16 +54,13 @@ devlog-llm/
 | 앱 | 스택 | 역할 |
 |---|---|---|
 | `apps/fe` | Next.js + React + TS | 노션 스타일 에디터로 글 작성, 글 목록/상세, AI 챗 UI |
-| `apps/be` | Go (표준 라이브러리 `net/http`) | 포스트 CRUD API, 인증(로그인), `apps/ai` 프록시/오케스트레이션 |
-| `apps/ai` | Python + FastAPI | 대화 수집 API, 임베딩 생성, 벡터DB 검색(RAG), LLM 응답 생성 |
+| `apps/api` | Python + FastAPI | 포스트 CRUD API, 대화 수집 API, 임베딩 생성, 벡터DB 검색(RAG), LLM 응답 생성 |
 
 ### 의존 방향
 
 ```
-apps/fe → apps/be → apps/ai
+apps/fe → apps/api
 ```
-
-FE는 BE만 호출. BE가 필요 시 AI 서비스를 내부적으로 호출 (AI 서비스를 FE에 직접 노출하지 않음).
 
 ---
 
@@ -69,13 +68,13 @@ FE는 BE만 호출. BE가 필요 시 AI 서비스를 내부적으로 호출 (AI 
 
 ### Phase 1 — 블로그 뼈대 구축
 
-- `apps/be`: Go 모듈 세팅, PostgreSQL 연결(Supabase 재사용 가능), `posts` 테이블 CRUD API
+- `apps/api`: FastAPI 세팅, Supabase(PostgreSQL) 연결, `posts` 테이블 CRUD API
 - `apps/fe`: Next.js 세팅, 글 목록/상세 페이지, 간단한 에디터(마크다운 or 블록 에디터)
 - 인증: 개인용이라 우선 심플하게 (단일 사용자, 비밀번호 or NextAuth)
 
 ### Phase 2 — 대화 기록 수집
 
-- `apps/ai`: FastAPI 세팅, `POST /conversations` (Claude Code 세션 대화 저장)
+- `apps/api`: `POST /conversations` (Claude Code 세션 대화 저장)
 - 개발 중 Claude Code와 나눈 대화를 이 API로 전송해서 축적
 - 스키마: `session_id`, `role`, `content`, `context`(어떤 프로젝트/주제), `created_at`
 
@@ -97,8 +96,8 @@ FE는 BE만 호출. BE가 필요 시 AI 서비스를 내부적으로 호출 (AI 
 
 | 소스 | 수집 방식 |
 |---|---|
-| 블로그 포스팅 | `apps/fe` 에디터에서 직접 작성 → `apps/be`에 저장 |
-| Claude Code 세션 대화 | 개발 중 수동/자동으로 `apps/ai`의 `POST /conversations`에 전송 |
+| 블로그 포스팅 | `apps/fe` 에디터에서 직접 작성 → `apps/api`에 저장 |
+| Claude Code 세션 대화 | 개발 중 수동/자동으로 `apps/api`의 `POST /conversations`에 전송 |
 
 ---
 
@@ -107,19 +106,18 @@ FE는 BE만 호출. BE가 필요 시 AI 서비스를 내부적으로 호출 (AI 
 | 역할 | 기술 | 선택 이유 |
 |---|---|---|
 | FE | Next.js + React + TS | 기존 숙련 스택 |
-| BE | Go | 클라우드 네이티브/마이크로서비스에서 수요 높은 언어, CS 기본기(동시성·성능) 학습 목적 |
-| AI/LLM | Python + FastAPI | LLM/임베딩 생태계 (LangChain, Groq 등) |
+| API | Python + FastAPI | AI/LLM 생태계 중심 언어, `smpay-ai-conversation-pipeline`과 학습 병행 |
 | DB | Supabase (PostgreSQL + pgvector) | 무료 플랜, RAG용 벡터 검색 내장 |
 | LLM | Groq (무료 API) | `smpay-ai-conversation-pipeline`에서 검증된 선택 |
-| 배포 | 미정 (Vercel/FE, Render/BE·AI 검토) | Phase 1 완료 후 결정 |
+| 배포 | 미정 (Vercel/FE, Render/API 검토) | Phase 1 완료 후 결정 |
 
 ---
 
 ## 우선순위
 
 1. ✅ 전략 수립 (현재)
-2. ⬜ Phase 1 — 블로그 뼈대 (FE + BE)
-3. ⬜ Phase 2 — 대화 기록 수집 (AI)
+2. ⬜ Phase 1 — 블로그 뼈대 (FE + API)
+3. ⬜ Phase 2 — 대화 기록 수집 (API)
 4. ⬜ Phase 3 — RAG 구축
 5. ⬜ Phase 4 — 챗 UI 통합
 
