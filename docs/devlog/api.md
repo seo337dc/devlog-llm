@@ -5,6 +5,37 @@
 
 ---
 
+## 2026-08-31 — Supabase 연결 + posts 생성/조회 확인 (Phase 1 최소 루프 완성)
+
+### 작업 내용
+
+| # | 작업 | 상태 |
+|---|------|------|
+| 1 | Supabase 프로젝트(`devlog-llm`) 생성, SQL Editor에서 `schema.sql` 실행 | ✅ |
+| 2 | `apps/api/.env`에 `SUPABASE_URL`/`SUPABASE_KEY` 설정 | ✅ |
+| 3 | `POST /posts` → `GET /posts`로 실제 Supabase 저장·조회 확인 | ✅ |
+
+### 트러블슈팅
+
+- **키 타입 실수**: Supabase가 최근 키 체계를 JWT(anon/service_role)에서 `sb_publishable_...`/`sb_secret_...`
+  형태로 바꿨는데, 처음에 publishable 키를 넣어서 insert 시 `new row violates row-level security policy` 에러
+  발생. secret 키(server 전용, RLS 우회)로 교체해서 해결.
+- **`.env` 위치 실수**: `python-dotenv`의 `load_dotenv()`는 실행 디렉터리 기준으로 상위로 탐색하지, 하위
+  디렉터리(`app/`)는 안 찾음. 에디터가 이전 경로를 기억해서 `apps/api/app/.env`에 저장되는 바람에 두 번이나
+  같은 실수 반복 — `apps/api/.env`(패키지 루트, `app/`의 부모)가 맞는 위치.
+
+### 결과
+
+STRATEGY.md Phase 1(블로그 뼈대)의 핵심 — "글 하나 쓰고 조회"가 실제로 동작 확인됨. PLANNING.md에서 정의한
+MVP 최소 루프("글 하나 쓰고 → AI 대화 하나 기록하고 → 회고 남기기") 중 첫 번째 조각 완성.
+
+### 다음 할 일
+
+- [ ] `apps/fe` 세팅 — 지금은 API만 있고 실제로 글 쓰는 화면이 없음
+- [ ] `POST /conversations` — 대화 수집 API (Phase 2)
+
+---
+
 ## 2026-08-28 (밤) — BE/AI 통합 + 언어 최종 확정: Python(FastAPI)
 
 ### 결정 배경
