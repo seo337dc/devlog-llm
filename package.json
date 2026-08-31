@@ -2,6 +2,8 @@
   "name": "devlog-llm",
   "version": "0.0.1",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "fe:dev": "pnpm --filter fe dev"
+  },
   "packageManager": "pnpm@11.21.0"
 }
