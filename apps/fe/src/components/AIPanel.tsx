@@ -20,7 +20,7 @@ export default function AIPanel() {
       </button>
 
       <div
-        className={`fixed inset-0 z-40 flex flex-col bg-white transition-transform duration-300 ${
+        className={`fixed inset-y-0 right-0 z-40 flex w-1/2 flex-col border-l border-zinc-200 bg-white shadow-2xl transition-transform duration-300 ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -34,7 +34,7 @@ export default function AIPanel() {
           </button>
         </div>
 
-        <div className="mx-auto w-full max-w-2xl flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden">
           <AIChat />
         </div>
       </div>

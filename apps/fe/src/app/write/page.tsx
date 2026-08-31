@@ -12,6 +12,7 @@ export default function Write() {
   const [category, setCategory] = useState("일상");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [preview, setPreview] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,30 +24,50 @@ export default function Write() {
 
   return (
     <div className="flex h-screen">
-      <div className="flex w-1/2 flex-col gap-4 overflow-y-auto px-8 py-16">
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="제목"
-          className="border-b border-zinc-200 pb-2 text-3xl font-bold outline-none"
-        />
+      <form
+        onSubmit={handleSubmit}
+        className="flex w-1/2 flex-col gap-4 overflow-y-auto px-8 py-16"
+      >
+        <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="제목"
+            className="flex-1 text-3xl font-bold outline-none"
+          />
+          <button
+            type="button"
+            onClick={() => setPreview((v) => !v)}
+            className="shrink-0 rounded border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50"
+          >
+            {preview ? "편집으로" : "미리보기"}
+          </button>
+        </div>
+
         <input
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           placeholder="분류"
           className="w-32 rounded border border-zinc-300 px-2 py-1 text-sm"
         />
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
+        {preview ? (
+          <div
+            className="prose prose-zinc max-w-none rounded border border-zinc-100 px-4 py-3"
+            dangerouslySetInnerHTML={{ __html: content || "<p class='text-zinc-400'>내용이 없습니다.</p>" }}
+          />
+        ) : (
           <Editor content={content} onChange={setContent} />
-          <button
-            type="submit"
-            disabled={submitting}
-            className="self-start rounded bg-black px-5 py-2 text-white disabled:opacity-50"
-          >
-            {submitting ? "저장 중..." : "발행"}
-          </button>
-        </form>
-      </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={submitting}
+          className="self-start rounded bg-black px-5 py-2 text-white disabled:opacity-50"
+        >
+          {submitting ? "저장 중..." : "발행"}
+        </button>
+      </form>
 
       <div className="w-1/2 border-l border-zinc-200">
         <AIChat />
