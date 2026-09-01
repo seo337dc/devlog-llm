@@ -1,8 +1,8 @@
 # CLAUDE.md — devlog-llm
 
 새 세션(다른 PC, 다른 AI 포함)에서 이 프로젝트를 이어받을 때 먼저 읽는 파일. 자세한 배경은
-`STRATEGY.md`(무엇을 만들지), `PLANNING.md`(왜 만들고 뭘 성공으로 볼지), `docs/devlog/{fe,api}.md`(날짜별
-상세 작업 이력)를 참고.
+`STRATEGY.md`(무엇을 만들지), `PLANNING.md`(왜 만들고 뭘 성공으로 볼지), `docs/DB_ROADMAP.md`(DB 스키마
+현황·설계 대안), `docs/devlog/{fe,api}.md`(날짜별 상세 작업 이력)를 참고.
 
 ---
 
