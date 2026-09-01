@@ -71,7 +71,9 @@ LLM(devlog-llm은 Groq)이 원래 질문 + 끼워넣은 참고 자료를 보고 
 
 ## devlog-llm에서 실제로 정해야 할 것들 (미리보기)
 
-- 임베딩 모델 선택 (OpenAI / Cohere / 오픈소스 등) → 벡터 차원(N)이 여기서 결정됨
+- 임베딩 모델 선택 — 조사는 끝났고 결정만 보류 중. 무료 우선 조건에서 Voyage AI `voyage-4-lite`
+  (카드 불필요, 200M 토큰 무료, 한국어 지원)가 유력 후보. 비교표는 `docs/DB_ROADMAP.md` Phase 3 참고.
+  이 모델이 확정되면 벡터 차원(N)도 같이 정해짐 (voyage-4-lite 기본 1024차원)
 - Chunking 전략 — 포스트는 문단 단위? 대화는 턴 단위, 아니면 세션 전체?
 - 테이블 설계 — 통합 vs 소스별 분리 (`docs/DB_ROADMAP.md` Phase 3의 A/B 옵션)
 - top-k 값, 그리고 "관련 없는 결과까지 끼워넣지 않기 위한" 최소 유사도 임계값

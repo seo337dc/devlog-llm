@@ -30,6 +30,9 @@ table posts (
 )
 ```
 
+컬럼별 설명은 `apps/api/schema.sql`의 `comment on column ...`으로 DB에 직접 달려 있음 (Supabase Studio
+테이블 뷰·`psql \d+`에서 확인 가능).
+
 ---
 
 ## Phase 2 — `conversations` ✅ 완료 (2026-09-01)
@@ -49,7 +52,8 @@ table conversations (
 ```
 
 `POST /chat`이 스트리밍 시작 전 사용자 메시지, 스트리밍 종료 후 AI 응답 전체를 자동 저장.
-`POST /conversations`도 독립 엔드포인트로 따로 존재.
+`POST /conversations`도 독립 엔드포인트로 따로 존재. 컬럼별 설명도 `schema.sql`에 `comment on column`으로
+달려 있음 (Phase 1과 동일).
 
 ---
 
@@ -57,7 +61,22 @@ table conversations (
 
 RAG 검색용 벡터 저장소. `posts`와 `conversations` 양쪽을 다 검색 대상으로 삼아야 하는데, 두 소스를
 하나의 임베딩 테이블로 묶을지 소스별로 나눌지가 아직 정해지지 않았다 (`STRATEGY.md`의 "미정 사항" —
-벡터DB 항목). 데이터가 좀 더 쌓인 뒤 진행 예정이라 지금은 두 안을 비교만 해둔다.
+벡터DB 항목). 데이터가 좀 더 쌓인 뒤 진행 예정이라 지금은 설계안과 임베딩 모델 후보를 비교만 해둔다.
+
+### 임베딩 모델 후보 (미확정)
+
+한국어 콘텐츠(블로그+대화 대부분 한국어)와 "무료 우선" 조건 기준으로 조사한 결과:
+
+| 모델 | 차원 | 무료 여부 | 카드 등록 | 한국어 | 판단 |
+|---|---|---|---|---|---|
+| Groq `nomic-embed-text-v1.5` | 64~768 | 완전 무료 (이미 있는 키) | 불필요 | ❌ 영어 전용 | 탈락 |
+| Cohere `embed-multilingual-v3.0` | 1024 | trial 키, 월 1000콜만 | 불필요 | ✅ | trial 키는 프로덕션 사용 금지 명시 — 배포된 서비스엔 부적합 |
+| Google Gemini embedding | - | 없음 (2026년 초 무료 티어 폐지) | 필요 | ✅ | 유료 전환됨, 탈락 |
+| OpenAI `text-embedding-3-small` | 1536 (축소 가능) | 없음 (유료, $0.02/1M) | 필요 | ✅ | 저렴하지만 "무료"는 아님 |
+| **Voyage AI `voyage-4-lite`** | 1024 (기본, 가변) | **200M 토큰 무료** | 불필요 | ✅ 명시 지원 | 유력 후보 — 카드 불필요, 무료 한도 넉넉, 프로덕션 제약 없음. Anthropic이 RAG용으로 공식 추천하는 임베딩 제공사이기도 함 |
+
+Voyage AI `voyage-4-lite`가 유력하지만 아직 확정하지 않고 보류 중. 결정되면 아래 A/B 스키마의 `vector(N)`도
+실제 차원 수로 채울 것.
 
 ### A. 통합 테이블
 
