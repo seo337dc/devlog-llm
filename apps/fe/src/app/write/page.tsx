@@ -2,9 +2,22 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import AIChat from "@/components/AIChat";
+import AIChat, { type Message } from "@/components/AIChat";
 import Editor from "@/components/Editor";
 import { createPost } from "@/lib/posts";
+
+function escapeHtml(text: string) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function buildDraftHtml(messages: Message[]) {
+  return messages
+    .map(
+      (m) =>
+        `<p><strong>${m.role === "user" ? "나" : "AI"}:</strong> ${escapeHtml(m.content)}</p>`
+    )
+    .join("");
+}
 
 export default function Write() {
   const router = useRouter();
@@ -13,6 +26,10 @@ export default function Write() {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [preview, setPreview] = useState(false);
+
+  function handleUseAsDraft(messages: Message[]) {
+    setContent((prev) => prev + buildDraftHtml(messages));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -70,7 +87,7 @@ export default function Write() {
       </form>
 
       <div className="w-1/2 border-l border-zinc-200">
-        <AIChat />
+        <AIChat onUseAsDraft={handleUseAsDraft} />
       </div>
     </div>
   );

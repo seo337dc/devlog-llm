@@ -4,6 +4,32 @@
 
 ---
 
+## 2026-09-01 (이어서 2) — "AI로 글쓰기": 대화 → 에디터 초안 (Phase 2 Step 4)
+
+대화 생성 방식 대안 제시 후 사용자가 "최소 버전"(추가 LLM 호출 없이 대화를 그대로 이어붙이기)을 선택.
+
+### 작업 내용
+
+| # | 작업 | 상태 |
+|---|------|------|
+| 1 | `AIChat.tsx` — `onUseAsDraft?: (messages) => void` prop 추가, 메시지가 있을 때만 "이 대화로 초안 만들기" 버튼 노출 (write 페이지 밖의 `AIPanel` 등에서는 prop을 안 넘기므로 버튼 자체가 안 보임) | ✅ |
+| 2 | `write/page.tsx` — `buildDraftHtml()`로 대화를 `<p><strong>나/AI:</strong> ...</p>` HTML로 변환, 기존 에디터 내용 뒤에 이어붙임(덮어쓰지 않음). 사용자 입력이 원본 그대로 HTML에 들어가므로 `escapeHtml()`로 `&`/`<`/`>`만 최소 이스케이프 | ✅ |
+| 3 | `Editor.tsx` — Tiptap `useEditor`의 `content`는 최초 마운트 값만 반영하고 이후 prop 변경을 무시한다는 점을 확인. `useEffect`로 `content !== editor.getHTML()`일 때만 `editor.commands.setContent()` 호출하도록 동기화 추가 (일반 타이핑 중 커서 튐 방지를 위해 값이 실제로 다를 때만 반영) | ✅ |
+| 4 | 브라우저에서 대화 후 버튼 클릭 → 에디터에 대화 내용 삽입 확인, 이어서 직접 타이핑해 커서 위치가 튀지 않고 정상 삽입되는지 확인 | ✅ |
+
+### 참고
+
+- AI 응답에 마크다운(`**bold**`, 표, `<br>`)이 섞여 있으면 그대로 텍스트로 삽입됨 — 렌더링/파싱 없이 원문
+  그대로 넣는 최소 버전이므로 의도된 동작. 실제로 써보고 불편하면 그때 LLM 재요약 버전(Phase 2 Step 4 설계
+  논의 시 논의된 대안)으로 넘어갈 것.
+
+### 결과
+
+STRATEGY.md Phase 2의 마지막 조각 — "AI와 대화하며 블로그를 자동으로 작성" 최소 버전 완성. PLANNING.md의
+MVP 루프("글 하나 쓰고 → AI 대화 하나 기록하고 → 회고 남기기")에서 AI 대화가 실제로 글쓰기에 연결됨.
+
+---
+
 ## 2026-09-01 — AIChat 실제 LLM 연동 (Phase 2 Step 2)
 
 `AIChat.tsx`가 로컬 state로만 동작하던 뼈대에서, `apps/api`의 `POST /chat`을 호출해 실제 Groq 응답을

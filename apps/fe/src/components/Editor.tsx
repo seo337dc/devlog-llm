@@ -2,6 +2,7 @@
 
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useEffect } from "react";
 
 type Props = {
   content?: string;
@@ -43,6 +44,13 @@ export default function Editor({ content = "", onChange }: Props) {
       },
     },
   });
+
+  useEffect(() => {
+    if (!editor) return;
+    if (content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
 
   if (!editor) return null;
 

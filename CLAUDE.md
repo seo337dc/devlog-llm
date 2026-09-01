@@ -11,13 +11,16 @@
 노션처럼 쓸 수 있는 개인 개발 블로그 + 그 글로 학습하는 개인용 AI. 사용자는 나 자신 하나뿐인 개인 프로젝트.
 핵심 가설은 "AI를 잘 쓰는 패턴은 기록·분석하면 재사용 가능한 지식이 된다" (PLANNING.md 참고).
 
-## 현재 상태 (2026-08-31 기준)
+## 현재 상태 (2026-09-01 기준)
 
 - **Phase 1(블로그 뼈대) 완료**: 글 작성/조회/카테고리 필터/상세 페이지까지 FE+API 연동 완료
-- **배포 완료**: FE(Vercel), API(Render) — 아래 링크 참고
+- **Phase 2(대화 기록 수집) 완료**: Groq 연동(`POST /chat`, SSE 스트리밍), `conversations` 테이블 자동 저장,
+  "이 대화로 초안 만들기"(대화 → 에디터 삽입, 최소 버전) — 전부 로컬에서 실제 동작 확인됨. 상세는
+  `docs/devlog/{api,fe}.md`의 2026-09-01 항목 참고
+- **배포 완료**: FE(Vercel), API(Render) — 아래 링크 참고. 단, 이번 세션 변경사항(Groq 연동 등)은 아직
+  로컬에서만 확인, 배포 환경에는 반영 전 (Render에 `GROQ_API_KEY` 환경변수 추가 필요)
 - **미해결**: Render `ALLOWED_ORIGINS`가 아직 `http://localhost:3010`로 남아있어서, 배포된 사이트에서
   브라우저가 직접 호출하는 `/write` 저장이 CORS로 막혀있음. Vercel URL로 업데이트 필요
-- **AI 채팅 UI는 뼈대만 있음** — 실제 LLM 응답 없이 로컬 state로만 동작 (Phase 2/3 이후 연동 예정)
 
 ## 아키텍처
 
@@ -94,9 +97,10 @@ pnpm --filter fe dev --port 3010
 ## 다음 할 일
 
 - [ ] Render `ALLOWED_ORIGINS`를 Vercel 배포 URL로 업데이트
+- [ ] Render에 `GROQ_API_KEY` 환경변수 추가 (배포 환경에서도 `/chat` 동작하려면 필요)
 - [ ] UI 전반 재검토 (사용자와 다음 세션에서 진행 예정)
-- [ ] `POST /conversations` — Claude Code 세션 대화 수집 API (Groq API 키 필요)
-- [ ] AI 채팅 UI를 실제 LLM 응답과 연결
-- [ ] AI와 대화하며 블로그를 자동으로 작성하는 기능
-- [ ] 임베딩 + 벡터DB(pgvector) 저장, RAG 검색
+- [x] `POST /chat` — 실제 LLM(Groq) 응답 연동, SSE 스트리밍 (2026-09-01)
+- [x] `POST /conversations` — 대화 저장 API + `conversations` 테이블, `/chat`이 자동 저장 (2026-09-01)
+- [x] AI와 대화하며 블로그를 자동으로 작성하는 기능 — 최소 버전(대화 그대로 이어붙이기) (2026-09-01)
+- [ ] 임베딩 + 벡터DB(pgvector) 저장, RAG 검색 — 데이터 축적 후 진행 (STRATEGY.md Phase 3)
 - [ ] 이미지 업로드, 글자 크기/스타일 등 에디터 기능 확장

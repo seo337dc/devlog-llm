@@ -4,13 +4,17 @@ import { useState } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-type Message = { role: "user" | "assistant"; content: string };
+export type Message = { role: "user" | "assistant"; content: string };
+
+type Props = {
+  onUseAsDraft?: (messages: Message[]) => void;
+};
 
 function createSessionId() {
   return crypto.randomUUID();
 }
 
-export default function AIChat() {
+export default function AIChat({ onUseAsDraft }: Props) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [sending, setSending] = useState(false);
@@ -74,6 +78,17 @@ export default function AIChat() {
 
   return (
     <div className="flex h-full flex-col">
+      {onUseAsDraft && messages.length > 0 && (
+        <div className="flex justify-end border-b border-zinc-200 px-6 py-2">
+          <button
+            type="button"
+            onClick={() => onUseAsDraft(messages)}
+            className="text-xs text-zinc-500 underline hover:text-zinc-800"
+          >
+            이 대화로 초안 만들기
+          </button>
+        </div>
+      )}
       <div className="flex-1 space-y-3 overflow-y-auto px-6 py-6">
         {messages.map((m, i) => (
           <div
