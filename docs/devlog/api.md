@@ -5,6 +5,37 @@
 
 ---
 
+## 2026-09-01 — Groq API 키 확보 (Phase 2 Step 1)
+
+### 작업 내용
+
+| # | 작업 | 상태 |
+|---|------|------|
+| 1 | `smpay-ai-conversation-pipeline`의 `GROQ_API_KEY` 재사용 결정 (신규 발급 대신) | ✅ |
+| 2 | `apps/api/.env`에 `GROQ_API_KEY` 추가, `.env.example` 갱신 | ✅ |
+| 3 | `requirements.txt`에 `groq==1.0.0`(+`distro`, `sniffio`) 추가, venv 설치 | ✅ |
+| 4 | 실제 Groq API 호출로 키 동작 확인 (`openai/gpt-oss-20b` 모델) | ✅ |
+
+### 판단 근거 — 키 재사용 여부
+
+`smpay-ai-conversation-pipeline`은 실제 SMPay 서비스용 AI 어시스턴트(회사 제품)라서, 회사 인프라 키를 개인
+프로젝트에 섞는 리스크(쿼터 공유, 키 회전 시 devlog-llm이 예고 없이 깨짐)를 짚고 신규 발급을 권장했으나,
+사용자가 기존 키 재사용을 선택함. 회전 시 devlog-llm도 영향받는다는 점을 인지한 상태로 진행.
+
+### 트러블슈팅
+
+- `openai/gpt-oss-20b`는 reasoning 모델이라 응답 전에 내부적으로 reasoning 토큰을 소모함. 테스트 시
+  `max_tokens=20`으로 호출하니 reasoning만 소모되고 실제 답변(`content`)이 빈 문자열로 잘림 —
+  `max_tokens=200`으로 올리니 정상 응답(`completion_tokens_details.reasoning_tokens=26` 확인). 향후 채팅
+  엔드포인트 구현 시 `max_tokens`를 충분히 잡아야 함 (smpay 쪽은 `max_tokens=1024` 사용 중, 동일하게 따라감).
+
+### 다음 할 일
+
+- [ ] `apps/api/app/routers/chat.py` — `POST /chat` SSE 스트리밍 엔드포인트 (Phase 2 Step 2)
+- [ ] FE `AIChat.tsx`가 실제 `/chat`을 호출하도록 연동
+
+---
+
 ## 2026-08-31 — Supabase 연결 + posts 생성/조회 확인 (Phase 1 최소 루프 완성)
 
 ### 작업 내용
