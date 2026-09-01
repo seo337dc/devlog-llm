@@ -8,6 +8,8 @@ from fastapi.responses import StreamingResponse
 from groq import Groq
 from pydantic import BaseModel
 
+from app.routers.conversations import save_conversation
+
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 SYSTEM_PROMPT = (
@@ -17,6 +19,7 @@ SYSTEM_PROMPT = (
 )
 
 MODEL = "openai/gpt-oss-20b"
+CONTEXT = "devlog-chat"
 
 
 class ChatMessage(BaseModel):
@@ -33,12 +36,17 @@ class ChatRequest(BaseModel):
 async def chat(data: ChatRequest):
     client = Groq(api_key=os.environ["GROQ_API_KEY"])
 
+    last_user = next((m for m in reversed(data.messages) if m.role == "user"), None)
+    if last_user:
+        save_conversation(data.session_id, "user", last_user.content, CONTEXT)
+
     groq_messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         *[{"role": m.role, "content": m.content} for m in data.messages],
     ]
 
     def generate():
+        full_text = ""
         stream = client.chat.completions.create(
             model=MODEL,
             messages=groq_messages,
@@ -48,8 +56,10 @@ async def chat(data: ChatRequest):
         for chunk in stream:
             text = chunk.choices[0].delta.content or ""
             if text:
+                full_text += text
                 yield f"data: {json.dumps({'text': text})}\n\n"
         yield "data: [DONE]\n\n"
+        save_conversation(data.session_id, "assistant", full_text, CONTEXT)
 
     return StreamingResponse(
         generate(),

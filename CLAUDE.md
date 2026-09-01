@@ -80,6 +80,10 @@ pnpm --filter fe dev --port 3010
 
 - **ruff**: `apps/api/pyproject.toml`에 `target-version = "py39"` 명시 필수. 없으면 `Optional[X]` →
   `X | None` 같은 3.10+ 문법을 자동 제안하는데, 실제 런타임(Python 3.9)에서 깨짐.
+- **pydantic 모델의 `X | None`**: 일반 변수/함수 시그니처는 `from __future__ import annotations`를 켜면
+  Python 3.9에서도 `X | None`이 안전하지만(`db/supabase.py`), **pydantic `BaseModel` 필드**는 런타임에
+  애노테이션을 다시 eval해서 3.9에서 그대로 깨짐(`TypeError: unsupported operand type(s) for |`). 모델
+  필드는 무조건 `typing.Optional[X]` 사용.
 - **CI-FE**: 빌드 전에 `tsc --noEmit`를 별도로 돌리면 안 됨 — Next.js가 `next build` 시점에 자동 생성하는
   `PageProps`/`LayoutProps` 타입(`.next/types`, gitignore 대상)이 아직 없어서 실패함. `next build`가 이미
   자체 타입체크를 포함하므로 그걸로 충분.

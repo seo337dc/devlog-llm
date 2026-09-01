@@ -60,6 +60,40 @@ STRATEGY.md Phase 2의 핵심 — "AI 채팅 UI가 실제 LLM 응답을 받는�
 
 ---
 
+## 2026-09-01 (이어서 2) — `conversations` 테이블 + `POST /conversations` (Phase 2 Step 3)
+
+### 작업 내용
+
+| # | 작업 | 상태 |
+|---|------|------|
+| 1 | 저장 방식 대안 제시 후 사용자 승인 — `/chat`이 공유 헬퍼(`save_conversation`)로 내부 자동 저장, `POST /conversations`는 별도 공개 엔드포인트로 유지(향후 Claude Code 세션 수집 등에 재사용 대비) | ✅ |
+| 2 | `schema.sql`에 `conversations` 테이블 추가 (`session_id`, `role`, `content`, `context`, `created_at`) — Supabase SQL Editor에서 사용자가 직접 실행 | ✅ |
+| 3 | `app/models.py`에 `ConversationCreate`/`Conversation` 추가 | ✅ |
+| 4 | `app/routers/conversations.py` 신규 — `save_conversation()` 내부 헬퍼(예외 삼킴, fire-and-forget) + `POST /conversations` 공개 엔드포인트 | ✅ |
+| 5 | `chat.py`가 스트리밍 시작 전 사용자 메시지, 스트리밍 종료 후 전체 assistant 응답을 `save_conversation()`으로 저장 (`context="devlog-chat"`) | ✅ |
+| 6 | `curl`로 `POST /conversations` 단독 호출 확인 → `/chat` 호출 후 Supabase에서 직접 조회해 user/assistant 두 행 모두 저장됨을 확인 → 브라우저 `/write`에서 실제 대화 후 동일하게 저장 확인 | ✅ |
+
+### 트러블슈팅
+
+- `app/models.py`에 `from __future__ import annotations` + `context: str | None`을 추가했더니 서버가 기동 시점에
+  `TypeError: unsupported operand type(s) for |: 'type' and 'NoneType'`로 죽음. `db/supabase.py`의
+  `Client | None`(일반 변수 애노테이션)과 달리, **pydantic `BaseModel` 필드**는 `from __future__ import
+  annotations`를 켜도 런타임에 문자열 애노테이션을 다시 eval하기 때문에 Python 3.9에서 `X | None` 문법이
+  그대로 깨짐. `typing.Optional[str]`로 바꾸고 `from __future__ import annotations`는 제거해서 해결. 같은
+  루트 원인(3.9 vs 3.10+ 문법)을 pydantic 모델에서 또 겪은 케이스 — CLAUDE.md의 "알아둘 것"에 일반화해서
+  추가할 필요 있음 (일반 변수/함수 시그니처는 안전, pydantic 모델 필드는 `Optional` 써야 함).
+
+### 결과
+
+STRATEGY.md Phase 2의 "대화 기록 수집" 핵심 루프 완성 — AIChat에서 나눈 대화가 실제로 Supabase에 쌓임.
+Phase 4(RAG)의 데이터 소스 하나가 실제로 축적되기 시작.
+
+### 다음 할 일
+
+- [ ] AI와의 대화로 에디터 초안을 채우는 "AI로 글쓰기" 기능 — Phase 2 Step 4
+
+---
+
 ## 2026-08-31 — Supabase 연결 + posts 생성/조회 확인 (Phase 1 최소 루프 완성)
 
 ### 작업 내용
