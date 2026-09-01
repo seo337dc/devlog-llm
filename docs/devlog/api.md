@@ -29,10 +29,34 @@
   `max_tokens=200`으로 올리니 정상 응답(`completion_tokens_details.reasoning_tokens=26` 확인). 향후 채팅
   엔드포인트 구현 시 `max_tokens`를 충분히 잡아야 함 (smpay 쪽은 `max_tokens=1024` 사용 중, 동일하게 따라감).
 
+---
+
+## 2026-09-01 (이어서) — `POST /chat` SSE 엔드포인트 + FE 연동 (Phase 2 Step 2)
+
+### 작업 내용
+
+| # | 작업 | 상태 |
+|---|------|------|
+| 1 | `app/routers/chat.py` 신규 — `POST /chat`, Groq `openai/gpt-oss-20b` 모델, SSE 스트리밍 (smpay 패턴 참고, `page_guidelines`·대화 저장 등 회사 전용/Step 3 기능은 제외한 최소 버전) | ✅ |
+| 2 | `main.py`에 `chat.router` 등록 | ✅ |
+| 3 | FE `AIChat.tsx` — 로컬 state뿐이던 뼈대를 실제 `fetch` + `ReadableStream`으로 SSE 응답을 받아 렌더링하도록 교체. `session_id`는 컴포넌트 마운트 시 `crypto.randomUUID()`로 1회 생성 | ✅ |
+| 4 | 로컬에서 API(`uvicorn`, 8000) + FE(`pnpm dev`, 3010) 동시 실행 후 `curl -N`으로 SSE 스트림 직접 확인, 이어서 브라우저로 `/write` 페이지에서 실제 대화 확인 (스크린샷) | ✅ |
+
+### 참고
+
+- 이번 단계는 대화 저장(Step 3) 없이 순수 프록시로만 구현. `conversations` 테이블이 아직 없어서 저장 로직을
+  넣으면 바로 에러가 나기 때문에 의도적으로 뺌.
+- FE 스트림 파싱은 `smpay-frontend-monorepo`의 `ChatDrawer.tsx` 패턴(줄 단위로 `data: ` 접두사 파싱, 마지막
+  assistant 메시지를 계속 갱신)을 그대로 가져옴 — 새로 설계하지 않고 검증된 패턴 재사용.
+
+### 결과
+
+STRATEGY.md Phase 2의 핵심 — "AI 채팅 UI가 실제 LLM 응답을 받는다"가 로컬에서 완전히 동작 확인됨.
+
 ### 다음 할 일
 
-- [ ] `apps/api/app/routers/chat.py` — `POST /chat` SSE 스트리밍 엔드포인트 (Phase 2 Step 2)
-- [ ] FE `AIChat.tsx`가 실제 `/chat`을 호출하도록 연동
+- [ ] `conversations` 테이블 + 저장 방식 결정 (자동 저장 vs 명시적 `POST /conversations`) — Phase 2 Step 3
+- [ ] AI와의 대화로 에디터 초안을 채우는 "AI로 글쓰기" 기능 — Phase 2 Step 4
 
 ---
 

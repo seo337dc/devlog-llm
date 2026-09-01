@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-09-01 — AIChat 실제 LLM 연동 (Phase 2 Step 2)
+
+`AIChat.tsx`가 로컬 state로만 동작하던 뼈대에서, `apps/api`의 `POST /chat`을 호출해 실제 Groq 응답을
+스트리밍으로 받아 렌더링하도록 교체됨 (API 쪽 작업 상세는 `docs/devlog/api.md` 참고).
+
+- `session_id`를 컴포넌트 마운트 시 `crypto.randomUUID()`로 한 번 생성해 유지 (대화 저장 붙일 Step 3 대비)
+- 스트림 파싱은 `data: {...}\n\n` 줄 단위로 처리, 마지막 assistant 메시지를 계속 갱신하는 방식 — 새로
+  설계하지 않고 `smpay-frontend-monorepo`의 `ChatDrawer.tsx` 패턴을 그대로 재사용
+- "아직 실제 학습된 답변 아님" 안내 문구는 이제 사실과 달라져서 제거 (실제 LLM 응답이 옴)
+- `/write` 페이지에서 브라우저로 실제 대화 확인 완료
+
+---
+
 ## 2026-08-31 (이어서 9) — Vercel 배포
 
 - Vercel에 레포 연결, Root Directory를 `apps/fe`로 수동 설정 (모노레포라 자동 감지 안 됨)

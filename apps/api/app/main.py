@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
-from app.routers import posts
+from app.routers import chat, posts
 
 app = FastAPI(title="devlog-llm API")
 
@@ -20,6 +20,7 @@ app.add_middleware(
 )
 
 app.include_router(posts.router)
+app.include_router(chat.router)
 
 
 @app.get("/health")
