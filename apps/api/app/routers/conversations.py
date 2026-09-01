@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter
 
 from app.db.supabase import get_client
 from app.models import Conversation, ConversationCreate
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
+
+logger = logging.getLogger(__name__)
 
 
 def save_conversation(
@@ -27,7 +31,7 @@ def save_conversation(
             }
         ).execute()
     except Exception:
-        pass
+        logger.exception("failed to save conversation (session_id=%s, role=%s)", session_id, role)
 
 
 @router.post("", response_model=Conversation, status_code=201)

@@ -1,2 +1,8 @@
 [tool.ruff]
 target-version = "py39"
+
+[tool.ruff.lint]
+# FA100: pydantic BaseModel 필드는 `from __future__ import annotations`를 켜도 런타임에 애노테이션을
+# 다시 eval해서 Python 3.9에서 `X | None`이 깨짐 (TypeError). Optional[X]를 강제하기 위해 이 룰은 끔.
+# 상세 이유는 CLAUDE.md "알아둘 것" 참고.
+ignore = ["FA100"]
